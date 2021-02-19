@@ -21,6 +21,7 @@ const DEFAULT_IMAGE = 'https://fashionunited.info/global-assets/img/default/fu-d
 
 const App = () => {
   const [data, setData] = useState({ newsArticles: [] });
+  const [pageInfo, setPageInfo] = useState({});
 
   useEffect(() => {
     const fetchArticles = async () => {
@@ -29,41 +30,46 @@ const App = () => {
       };
       const result = await getNewsArticles(variables);
       setData({
-        newsArticles: result.fashionunitedNlNewsArticles,
+        newsArticles: result.fashionunitedNlNewsArticlesConnection.edges,
       });
+      setPageInfo(result.fashionunitedNlNewsArticlesConnection.pageInfo)
     };
     fetchArticles();
-  }, []);
+  }, [data]);
 
   return (
     <Container>
       <h1>Fashion News</h1>
       <Grid container spacing={3}>
-        {data.newsArticles.map((newsArticle) => (
-          <Grid item xs={12} sm={3} key={newsArticle.title}>
+        {data.newsArticles.map((newsArticle) => {
+
+         const {node: { title, imageUrl, description, url }, cursor} = newsArticle
+
+          return (
+          <Grid item xs={12} sm={3} key={imageUrl}>
             <StyledCard>
               <CardMedia
                 component="img"
-                alt={newsArticle.title}
-                image={newsArticle.imageUrl ? `https://r.fashionunited.com${newsArticle.imageUrl}` : DEFAULT_IMAGE}
-                title={newsArticle.title}
+                alt={title}
+                image={imageUrl ? `https://r.fashionunited.com${imageUrl}` : DEFAULT_IMAGE}
+                title={title}
               />
               <CardContent>
                 <Typography gutterBottom variant="h6" component="h2">
-                  {newsArticle.title}
+                  {title}
                 </Typography>
                 <Typography variant="body2" color="textSecondary" component="p">
-                  {newsArticle.description}
+                  {description}
                 </Typography>
                 <Typography variant="button" color="textSecondary" component="div">
-                  {newsArticle.description}
                   {' '}
-                  <a href={newsArticle.url}>Read more</a>
+                  <a href={url}>Read more</a>
                 </Typography>
               </CardContent>
             </StyledCard>
           </Grid>
-        ))}
+          )
+})}
       </Grid>
     </Container>
   );
