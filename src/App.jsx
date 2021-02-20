@@ -13,6 +13,17 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import styled from '@emotion/styled';
 import { experimentalStyled as overrideMaterial } from '@material-ui/core/styles';
 import getNewsArticles from './lib/getNewsArticles';
+import MuiPagination from '@material-ui/core/Pagination';
+
+
+const Pagination = ({onChange, page, count}) => {
+  return (
+    <>
+      <MuiPagination count={count} page={page} color="primary" onChange={onChange}/>
+    </>
+  );
+}
+
 
 const StyledCard = overrideMaterial(Card)`
   height: 100%;
@@ -27,9 +38,12 @@ const DEFAULT_IMAGE = 'https://fashionunited.info/global-assets/img/default/fu-d
 
 const App = () => {
   const [data, setData] = useState({ newsArticles: [] });
-  const [offset, setOffset] = useState(0);
   const [open, setOpen] = useState(false);
   const [modalArticle, setModalArticle] = useState({});
+  const [offset, setOffset] = useState(0);
+  const [page, setPage] = React.useState(1);
+
+  console.log(page);
 
   const handleModal = (article) => {
     setModalArticle(article);
@@ -40,9 +54,14 @@ const App = () => {
     setOpen(false);
   };
 
+  const handlePagination = (event, value) => {
+    setPage(value);
+    setOffset(page * 10);
+  }
+
   useEffect(() => {
     const variables = {
-      keywords: ['hunkemoller'],
+      keywords: ['nike'],
       offset: offset,
     };
     const fetchArticles = async () => {
@@ -51,10 +70,8 @@ const App = () => {
         newsArticles: result.fashionunitedNlNewsArticles,
       });
     };
-
     fetchArticles();
-
-  }, [offset]);
+  }, [page, offset]);
 
   return (
     <Container>
@@ -63,7 +80,7 @@ const App = () => {
         {data.newsArticles.map((newsArticle, index) => {
 
          const { title, imageUrl } = newsArticle;
-         const { title: modalTitle, url: modalUrl, description: modalDescription } = modalArticle;
+         const { title: modalTitle, url: modalUrl, description: modalDescription, imageUrl: modalImageUrl } = modalArticle;
 
           return (
           <Grid item xs={12} sm={3} key={imageUrl + index}>
@@ -94,6 +111,12 @@ const App = () => {
             {modalTitle}
           </DialogTitle>
           <DialogContent>
+          <CardMedia
+                component="img"
+                alt={modalTitle}
+                image={modalImageUrl ? `https://r.fashionunited.com${modalImageUrl}` : DEFAULT_IMAGE}
+                title={modalTitle}
+              />
             <DialogContentText id="alert-dialog-description">
               {modalDescription}
             </DialogContentText>
@@ -109,7 +132,7 @@ const App = () => {
           )
 })}
       </Grid>
-      <Button onClick={() => setOffset(offset + 10)} variant="contained">Load more</Button>
+      <Pagination onChange={handlePagination} page={page} count={5} />
     </Container>
   );
 };
