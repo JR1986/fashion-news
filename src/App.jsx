@@ -28,15 +28,11 @@ const DEFAULT_IMAGE = 'https://fashionunited.info/global-assets/img/default/fu-d
 const App = () => {
   const [data, setData] = useState({ newsArticles: [] });
   const [offset, setOffset] = useState(0);
-  const [open, setOpen] = React.useState(false);
-  const [index, setIndex] = React.useState(0);
+  const [open, setOpen] = useState(false);
+  const [modalArticle, setModalArticle] = useState({});
 
-  console.log(data.newsArticles[index]);
-
-  const { title, description, url } = data.newsArticles[index];
-
-  const handleClickOpen = (index) => {
-    setIndex(index);
+  const handleModal = (article) => {
+    setModalArticle(article);
     setOpen(true);
   };
 
@@ -45,18 +41,19 @@ const App = () => {
   };
 
   useEffect(() => {
+    const variables = {
+      keywords: ['hunkemoller'],
+      offset: offset,
+    };
     const fetchArticles = async () => {
-
-      const variables = {
-        keywords: ['hunkemoller'],
-        offset: offset,
-      };
       const result = await getNewsArticles(variables);
       setData({
         newsArticles: result.fashionunitedNlNewsArticles,
       });
     };
+
     fetchArticles();
+
   }, [offset]);
 
   return (
@@ -65,7 +62,8 @@ const App = () => {
       <Grid container spacing={3}>
         {data.newsArticles.map((newsArticle, index) => {
 
-         const { title, imageUrl, description } = newsArticle;
+         const { title, imageUrl } = newsArticle;
+         const { title: modalTitle, url: modalUrl, description: modalDescription } = modalArticle;
 
           return (
           <Grid item xs={12} sm={3} key={imageUrl + index}>
@@ -80,40 +78,37 @@ const App = () => {
                 <Typography gutterBottom variant="h6" component="h2">
                   {title}
                 </Typography>
-                <Typography variant="body2" color="textSecondary" component="p">
-                  {description}
-                </Typography>
                 <Typography variant="button" color="textSecondary" component="div">
                   {' '}
-                  <Button onClick={(index) => handleClickOpen(index)}>Read more</Button>
+                  <Button onClick={() => handleModal(newsArticle)}>Read more</Button>
                 </Typography>
               </CardContent>
             </StyledCard>
-          </Grid>
-          )
-})}
-      </Grid>
-      <Dialog
+            <Dialog
                 open={open}
                 onClose={handleClose}
                 aria-labelledby="alert-dialog-title"
                 aria-describedby="alert-dialog-description"
               >
           <DialogTitle id="alert-dialog-title">
-            {title}
+            {modalTitle}
           </DialogTitle>
           <DialogContent>
             <DialogContentText id="alert-dialog-description">
-              {description}
+              {modalDescription}
             </DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={handleClose}>Disagree</Button>
-            <a href={url}>
+            <a href={modalUrl}>
               Read more
             </a>
           </DialogActions>
         </Dialog>
+          </Grid>
+          )
+})}
+      </Grid>
       <Button onClick={() => setOffset(offset + 10)} variant="contained">Load more</Button>
     </Container>
   );
