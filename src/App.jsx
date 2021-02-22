@@ -43,7 +43,7 @@ const App = () => {
   const [offset, setOffset] = useState(0);
   const [page, setPage] = React.useState(1);
 
-  console.log(page);
+  const { title: modalTitle, url: modalUrl, description: modalDescription, imageUrl: modalImageUrl } = modalArticle;
 
   const handleModal = (article) => {
     setModalArticle(article);
@@ -56,7 +56,6 @@ const App = () => {
 
   const handlePagination = (event, value) => {
     setPage(value);
-    setOffset(page * 10);
   }
 
   useEffect(() => {
@@ -69,6 +68,7 @@ const App = () => {
       setData({
         newsArticles: result.fashionunitedNlNewsArticles,
       });
+      setOffset((page - 1) * 10);
     };
     fetchArticles();
   }, [page, offset]);
@@ -80,7 +80,6 @@ const App = () => {
         {data.newsArticles.map((newsArticle, index) => {
 
          const { title, imageUrl } = newsArticle;
-         const { title: modalTitle, url: modalUrl, description: modalDescription, imageUrl: modalImageUrl } = modalArticle;
 
           return (
           <Grid item xs={12} sm={3} key={imageUrl + index}>
@@ -101,7 +100,11 @@ const App = () => {
                 </Typography>
               </CardContent>
             </StyledCard>
-            <Dialog
+          </Grid>
+          )
+})}
+      </Grid>
+      <Dialog
                 open={open}
                 onClose={handleClose}
                 aria-labelledby="alert-dialog-title"
@@ -128,10 +131,6 @@ const App = () => {
             </a>
           </DialogActions>
         </Dialog>
-          </Grid>
-          )
-})}
-      </Grid>
       <Pagination onChange={handlePagination} page={page} count={5} />
     </Container>
   );
